@@ -73,7 +73,7 @@ func NewSession(t Transport) *Session {
 	s.ServerCapabilities = serverHello.Capabilities
 
 	// Send our hello using default capabilities.
-	t.SendHello(&HelloMessage{Capabilities: DefaultCapabilities})
+	t.SendHello(&HelloMessage{XMLNms: "urn:ietf:params:xml:ns:netconf:base:1.0", Capabilities: DefaultCapabilities})
 
 	return s
 }

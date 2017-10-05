@@ -15,12 +15,13 @@ const (
 
 // DefaultCapabilities sets the default capabilities of the client library
 var DefaultCapabilities = []string{
-	"urn:ietf:params:xml:ns:netconf:base:1.0",
+	"urn:ietf:params:xml:ns:netconf:base:1.0", "urn:ietf:params:netconf:base:1.0",
 }
 
 // HelloMessage is used when bringing up a NetConf session
 type HelloMessage struct {
 	XMLName      xml.Name `xml:"hello"`
+	XMLNms       string   `xml:"xmlns,attr"`
 	Capabilities []string `xml:"capabilities>capability"`
 	SessionID    int      `xml:"session-id,omitempty"`
 }
