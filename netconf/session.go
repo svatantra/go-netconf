@@ -2,6 +2,7 @@ package netconf
 
 import (
 	"encoding/xml"
+	"regexp"
 )
 
 // Session defines the necessary components for a Netconf session
