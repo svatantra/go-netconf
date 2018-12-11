@@ -42,11 +42,14 @@ func (s *Session) Exec(methods ...RPCMethod) (*RPCReply, error) {
 	}
 	log.Debugf("REPLY: %s\n", rawXML)
 
-	reply := &RPCReply{}
-	reply.RawReply = string(rawXML)
+	re := regexp.MustCompile("[[:^ascii:]]")
+	t := re.ReplaceAllLiteralString(string(rawXML), "")
 
-	if err := xml.Unmarshal(rawXML, reply); err != nil {
-		return nil, err
+	reply := &RPCReply{}
+	reply.RawReply = t
+
+	if err := xml.Unmarshal([]byte(t), reply); err != nil {
+    	    return nil, err
 	}
 
 	if reply.Errors != nil {
