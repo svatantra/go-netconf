@@ -2,7 +2,8 @@ package netconf
 
 import (
 	"encoding/xml"
-	"regexp"
+	"strings"
+	"unicode"
 )
 
 // Session defines the necessary components for a Netconf session
@@ -43,8 +44,15 @@ func (s *Session) Exec(methods ...RPCMethod) (*RPCReply, error) {
 	}
 	log.Debugf("REPLY: %s\n", rawXML)
 
-	re := regexp.MustCompile("[[:^ascii:]]")
-	t := re.ReplaceAllLiteralString(string(rawXML), "")
+	//https://blog.zikes.me/post/cleaning-xml-files-before-unmarshaling-in-go/
+	printOnly := func(r rune) rune {
+		if unicode.IsPrint(r) {
+			return r
+		}
+		return -1
+	}
+	t := strings.Map(printOnly, string(rawXML))
+
 
 	reply := &RPCReply{}
 	reply.RawReply = t
