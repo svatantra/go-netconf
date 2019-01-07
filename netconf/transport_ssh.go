@@ -109,7 +109,7 @@ func NewSSHSession(conn net.Conn, config *ssh.ClientConfig) (*Session, error) {
 		return nil, err
 	}
 
-	return NewSession(t), nil
+	return NewSession(t)
 }
 
 // DialSSH creates a new NETCONF session using a SSH Transport.
@@ -120,7 +120,7 @@ func DialSSH(target string, config *ssh.ClientConfig) (*Session, error) {
 	if err != nil {
 		return nil, err
 	}
-	return NewSession(&t), nil
+	return NewSession(&t)
 }
 
 // DialSSHTimeout creates a new NETCONF session using a SSH Transport with timeout.
@@ -149,7 +149,7 @@ func DialSSHTimeout(target string, config *ssh.ClientConfig, timeout time.Durati
 		}
 	}()
 
-	return NewSession(t), nil
+	return NewSession(t)
 }
 
 // SSHConfigPassword is a convenience function that takes a username and password

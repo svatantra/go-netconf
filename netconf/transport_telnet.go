@@ -57,5 +57,5 @@ func DialTelnet(target string, username string, password string, vendor VendorIO
 	if err := t.Dial(target, username, password, vendor); err != nil {
 		return nil, err
 	}
-	return NewSession(&t), nil
+	return NewSession(&t)
 }

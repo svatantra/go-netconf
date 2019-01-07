@@ -10,7 +10,8 @@ import (
 
 const (
 	// msgSeperator is used to separate sent messages via NetConf
-	msgSeperator = "]]>]]>"
+	msgSeperator  = "]]>]]>"
+	xmlEndComment = "-->"
 )
 
 // DefaultCapabilities sets the default capabilities of the client library
@@ -69,12 +70,20 @@ func (t *transportBasicIO) SendHello(hello *HelloMessage) error {
 func (t *transportBasicIO) ReceiveHello() (*HelloMessage, error) {
 	hello := new(HelloMessage)
 
-	val, err := t.Receive()
+	re := regexp.MustCompile(`(?:` + msgSeperator + `|` + xmlEndComment + `)`)
+	val, _, err := t.WaitForRegexp(re)
+
 	if err != nil {
 		return hello, err
 	}
 
+	if bytes.Contains(val, []byte("Error")) {
+		re := regexp.MustCompile(`(<!-- | -->)`)
+		return hello, fmt.Errorf(re.ReplaceAllString(string(val), ""))
+	}
+
 	err = xml.Unmarshal([]byte(val), hello)
+
 	return hello, err
 }
 
@@ -95,6 +104,7 @@ func (t *transportBasicIO) WaitForFunc(f func([]byte) (int, error)) ([]byte, err
 			if err != io.EOF {
 				return nil, err
 			}
+
 			break
 		}
 
