@@ -14,6 +14,24 @@ type Session struct {
 	ErrOnWarning       bool
 }
 
+// ExchangeHello is used to exchange capabilities for the Netconf session
+func (s *Session) ExchangeHello() error {
+	// Receive Servers Hello message
+	serverHello, err := s.Transport.ReceiveHello()
+
+	if err != nil {
+		return err
+	}
+
+	s.SessionID = serverHello.SessionID
+	s.ServerCapabilities = serverHello.Capabilities
+
+	// Send our hello using default capabilities.
+	err = s.Transport.SendHello(&HelloMessage{XMLNms: "urn:ietf:params:xml:ns:netconf:base:1.0", Capabilities: DefaultCapabilities})
+
+	return err
+}
+
 // Close is used to close and end a transport session
 func (s *Session) Close() error {
 	return s.Transport.Close()
@@ -53,12 +71,11 @@ func (s *Session) Exec(methods ...RPCMethod) (*RPCReply, error) {
 	}
 	t := strings.Map(printOnly, string(rawXML))
 
-
 	reply := &RPCReply{}
 	reply.RawReply = t
 
 	if err := xml.Unmarshal([]byte(t), reply); err != nil {
-    	    return nil, err
+		return nil, err
 	}
 
 	if reply.Errors != nil {
@@ -75,17 +92,11 @@ func (s *Session) Exec(methods ...RPCMethod) (*RPCReply, error) {
 }
 
 // NewSession creates a new NetConf session using the provided transport layer.
-func NewSession(t Transport) *Session {
+func NewSession(t Transport) (*Session, error) {
 	s := new(Session)
 	s.Transport = t
 
-	// Receive Servers Hello message
-	serverHello, _ := t.ReceiveHello()
-	s.SessionID = serverHello.SessionID
-	s.ServerCapabilities = serverHello.Capabilities
+	err := s.ExchangeHello()
 
-	// Send our hello using default capabilities.
-	t.SendHello(&HelloMessage{XMLNms: "urn:ietf:params:xml:ns:netconf:base:1.0", Capabilities: DefaultCapabilities})
-
-	return s
+	return s, err
 }
